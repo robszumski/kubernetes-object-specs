@@ -1,0 +1,130 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: selfsubjectrulesreviews.authorization.openshift.io
+spec:
+  conversion:
+    strategy: None
+  group: authorization.openshift.io
+  names:
+    kind: SelfSubjectRulesReview
+    listKind: SelfSubjectRulesReviewList
+    plural: selfsubjectrulesreviews
+    singular: selfsubjectrulesreview
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: |-
+          SelfSubjectRulesReview is a resource you can create to determine which actions you can perform in a namespace
+
+          Compatibility level 1: Stable within a major release for a minimum of 12 months or 3 minor releases (whichever is longer).
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          spec:
+            description: Spec adds information about how to conduct the check
+            properties:
+              scopes:
+                description: Scopes to use for the evaluation.  Empty means "use the
+                  unscoped (full) permissions of the user/groups". Nil means "use
+                  the scopes on this request".
+                items:
+                  type: string
+                type: array
+            required:
+            - scopes
+            type: object
+          status:
+            description: Status is completed by the server to tell which permissions
+              you have
+            properties:
+              evaluationError:
+                description: EvaluationError can appear in combination with Rules.  It
+                  means some error happened during evaluation that may have prevented
+                  additional rules from being populated.
+                type: string
+              rules:
+                description: Rules is the list of rules (no particular sort) that
+                  are allowed for the subject
+                items:
+                  description: PolicyRule holds information that describes a policy
+                    rule, but does not contain information about who the rule applies
+                    to or which namespace the rule applies to.
+                  properties:
+                    apiGroups:
+                      description: APIGroups is the name of the APIGroup that contains
+                        the resources.  If this field is empty, then both kubernetes
+                        and origin API groups are assumed. That means that if an action
+                        is requested against one of the enumerated resources in either
+                        the kubernetes or the origin API group, the request will be
+                        allowed
+                      items:
+                        type: string
+                      type: array
+                    attributeRestrictions:
+                      description: AttributeRestrictions will vary depending on what
+                        the Authorizer/AuthorizationAttributeBuilder pair supports.
+                        If the Authorizer does not recognize how to handle the AttributeRestrictions,
+                        the Authorizer should report an error.
+                      type: object
+                    nonResourceURLs:
+                      description: NonResourceURLsSlice is a set of partial urls that
+                        a user should have access to.  *s are allowed, but only as
+                        the full, final step in the path This name is intentionally
+                        different than the internal type so that the DefaultConvert
+                        works nicely and because the ordering may be different.
+                      items:
+                        type: string
+                      type: array
+                    resourceNames:
+                      description: ResourceNames is an optional white list of names
+                        that the rule applies to.  An empty set means that everything
+                        is allowed.
+                      items:
+                        type: string
+                      type: array
+                    resources:
+                      description: Resources is a list of resources this rule applies
+                        to.  ResourceAll represents all resources.
+                      items:
+                        type: string
+                      type: array
+                    verbs:
+                      description: Verbs is a list of Verbs that apply to ALL the
+                        ResourceKinds and AttributeRestrictions contained in this
+                        rule.  VerbAll represents all kinds.
+                      items:
+                        type: string
+                      type: array
+                  required:
+                  - verbs
+                  - resources
+                  type: object
+                type: array
+            required:
+            - rules
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions:
+  - v1
